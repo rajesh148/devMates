@@ -2,27 +2,24 @@ const express = require("express");
 
 const app = express();
 
+const { authMiddleware, userMiddleware } = require("./middlewares/middlewares");
+
 // app.use("/user", (req, res) => {
 //   res.send("hahahahahaha");
 // });
 
-app.get("/user", (req, res) => {
+app.use("/admin", authMiddleware);
+
+app.get("/user", userMiddleware, (req, res) => {
   res.send({ firstName: "Rajesh", lastName: "Bagguva" });
 });
 
-app.post("/user", async (req, res) => {
-  console.log(req.body);
-  //Save the data into DB first
-  res.send("User data POST successfully");
+app.get("/admin/:id", (req, res) => {
+  res.send("Admin usrer id");
 });
 
-app.delete("/user", (req, res) => {
-  //Delete the data into DB first then do the send message
-  res.send("User data delete successfully");
-});
-
-app.use("/test", (req, res) => {
-  res.end("This is for /test");
+app.post("/admin/createData", (req, res) => {
+  res.send("Data created!!!!");
 });
 
 app.listen("7777", () => {
