@@ -6,15 +6,10 @@ const app = express();
 
 const PORT = 7777;
 
-app.post("/signup", async (req, res) => {
-  const userData = {
-    firstName: "Rajesh",
-    lastName: "Bagguva",
-    email: "rajesh@bagguva.com",
-    password: "rajesh@123",
-  };
+app.use(express.json());
 
-  const user = new User(userData);
+app.post("/signup", async (req, res) => {
+  const user = new User(req.body);
 
   try {
     await user.save();
