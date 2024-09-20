@@ -13,7 +13,7 @@ const authMiddleware = (req, res, next) => {
 const userMiddleware = (req, res, next) => {
   const token = "sandy";
 
-  const authUser = token === "sany";
+  const authUser = token === "sandy";
 
   if (!authUser) {
     res.status(401).send("Unauthorized user action");

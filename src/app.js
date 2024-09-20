@@ -11,6 +11,7 @@ const { authMiddleware, userMiddleware } = require("./middlewares/middlewares");
 app.use("/admin", authMiddleware);
 
 app.get("/user", userMiddleware, (req, res) => {
+  // throw new Error("This is an error");
   res.send({ firstName: "Rajesh", lastName: "Bagguva" });
 });
 
@@ -20,6 +21,12 @@ app.get("/admin/:id", (req, res) => {
 
 app.post("/admin/createData", (req, res) => {
   res.send("Data created!!!!");
+});
+
+app.use("/", (err, req, res, next) => {
+  if (err) {
+    res.status(500).send("Something went wrong!!!!");
+  }
 });
 
 app.listen("7777", () => {
