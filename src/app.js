@@ -1,5 +1,6 @@
 const express = require("express");
 const connectDB = require("./config/database");
+const mongoSanitize = require("express-mongo-sanitize");
 const User = require("./model/user");
 
 const app = express();
@@ -7,6 +8,8 @@ const app = express();
 const PORT = 7777;
 
 app.use(express.json());
+
+app.use(mongoSanitize());
 
 app.post("/signup", async (req, res) => {
   const user = new User(req.body);
@@ -66,19 +69,38 @@ app.delete("/user", async (req, res) => {
   }
 });
 
-app.patch("/user", async (req, res) => {
+app.patch("/user/:userId", async (req, res) => {
   console.log("body", req.body);
   try {
-    const userId = req.body.userId;
+    const userId = req.params.userId;
 
     const data = req.body;
 
-    // console.log(data);
+    console.log(data);
 
-    const returnObj = await User.findOneAndUpdate(
-      { email: req.body.email },
-      data
+    const allowedFields = [
+      "firstName",
+      "lastName",
+      "gender",
+      "photoUrl",
+      "about",
+      "password",
+      "skills",
+    ];
+
+    console.log("all ", Object.keys(req.body));
+
+    const isAllowedToChange = Object.keys(req.body).every((item) =>
+      allowedFields.includes(item)
     );
+
+    if (!isAllowedToChange) {
+      throw new Error("Update not possible");
+    }
+
+    const returnObj = await User.findOneAndUpdate({ _id: userId }, data, {
+      runValidators: true,
+    });
 
     console.log("Obj ", returnObj);
     res.send("Data updatged successfully");
