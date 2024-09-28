@@ -4,6 +4,7 @@ const mongoSanitize = require("express-mongo-sanitize");
 const User = require("./model/user");
 const { validateSignUp } = require("./utils/validation");
 const bcrypt = require("bcrypt");
+const validator = require("validator");
 
 const app = express();
 
@@ -31,6 +32,34 @@ app.post("/signup", async (req, res) => {
 
     await user.save();
     res.send("User added successfully!!!");
+  } catch (err) {
+    res.status(400).send("ERROR : " + err.message);
+  }
+});
+
+//Login
+app.post("/login", async (req, res) => {
+  try {
+    const { email, password } = req.body;
+
+    //email check;
+    if (!validator.isEmail(email)) {
+      throw new Error("Invalid credentials!");
+    }
+
+    const user = await User.findOne({ email });
+
+    if (!user) {
+      throw new Error("Invalid credentials!");
+    }
+
+    const isPasswordValid = await bcrypt.compare(password, user.password);
+
+    if (isPasswordValid) {
+      res.send("Login Successfully!!!");
+    } else {
+      throw new Error("Invalid credentials!");
+    }
   } catch (err) {
     res.status(400).send("ERROR : " + err.message);
   }
