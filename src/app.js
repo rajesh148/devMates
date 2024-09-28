@@ -5,12 +5,17 @@ const User = require("./model/user");
 const { validateSignUp } = require("./utils/validation");
 const bcrypt = require("bcrypt");
 const validator = require("validator");
+const cookieParser = require("cookie-parser");
+const jwt = require("jsonwebtoken");
+const { userAuth } = require("./middlewares/Auth");
 
 const app = express();
 
 const PORT = 7777;
 
 app.use(express.json());
+
+app.use(cookieParser());
 
 app.use(mongoSanitize());
 
@@ -56,6 +61,12 @@ app.post("/login", async (req, res) => {
     const isPasswordValid = await bcrypt.compare(password, user.password);
 
     if (isPasswordValid) {
+      //Create a token
+      const token = jwt.sign({ _id: user._id }, "This is", { expiresIn: "1d" });
+
+      res.cookie("token", token, {
+        expires: new Date(Date.now() + 8 * 3600000),
+      });
       res.send("Login Successfully!!!");
     } else {
       throw new Error("Invalid credentials!");
@@ -65,91 +76,21 @@ app.post("/login", async (req, res) => {
   }
 });
 
-app.get("/user", async (req, res) => {
-  //   try {
-  //     //Find will return the array. So we are name it as plural
-  //     const users = await User.find({ email: req.body.email });
-  //     if (users.length !== 0) {
-  //       res.send(users);
-  //     } else {
-  //       res.status(404).send("User not found!!");
-  //     }
-  //   } catch (err) {
-  //     res.status(404).send("Something went wrong!!");
-  //   }
-  // });
-
-  console.log(req.body);
-
+app.get("/profile", userAuth, async (req, res) => {
   try {
-    const user = await User.findById(req.body._id);
-    if (user) {
-      res.send(user);
-    } else {
-      res.status(404).send("User not found!!");
-    }
-  } catch (err) {
-    res.status(404).send("Something went wrong!!");
-  }
-});
-
-app.get("/feed", async (req, res) => {
-  // try {
-  const users = await User.find({});
-  res.send(users);
-  // } catch (err) {
-  //   res.status(404).send("Something went wrong!!");
-  // }
-});
-
-app.delete("/user", async (req, res) => {
-  try {
-    await User.findByIdAndDelete({ _id: req.body._id });
-    // console.log(deleteOne);
-    res.send("Deleted successfully");
-  } catch (err) {
-    res.status(404).send("Something went wrong!!");
-  }
-});
-
-app.patch("/user/:userId", async (req, res) => {
-  console.log("body", req.body);
-  try {
-    const userId = req.params.userId;
-
-    const data = req.body;
-
-    console.log(data);
-
-    const allowedFields = [
-      "firstName",
-      "lastName",
-      "gender",
-      "photoUrl",
-      "about",
-      "password",
-      "skills",
-    ];
-
-    console.log("all ", Object.keys(req.body));
-
-    const isAllowedToChange = Object.keys(req.body).every((item) =>
-      allowedFields.includes(item)
-    );
-
-    if (!isAllowedToChange) {
-      throw new Error("Update not possible");
+    const user = req.user;
+    if (!user) {
+      throw new Error("Invalid user");
     }
 
-    const returnObj = await User.findOneAndUpdate({ _id: userId }, data, {
-      runValidators: true,
-    });
-
-    console.log("Obj ", returnObj);
-    res.send("Data updatged successfully");
+    res.send(user);
   } catch (err) {
-    res.status(404).send("Something went wrong!!" + err.message);
+    res.status(400).send("ERROR : " + err.message);
   }
+});
+
+app.get("/sendConnectionRequest", userAuth, (req, res) => {
+  res.send("sent connection");
 });
 
 connectDB()
