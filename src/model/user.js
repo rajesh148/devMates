@@ -33,7 +33,7 @@ const userSchema = new mongoose.Schema(
       type: String,
       required: [true, "Password is required"],
       minLength: [4, "Password Length should be more than 3"],
-      maxLength: [50, "Password Length should be less than 50"],
+      // maxLength: [50, "Password Length should be less than 50"],
       validate: (value) => {
         if (!validator.isStrongPassword(value)) {
           throw new Error("Your password is not stronger");
@@ -57,7 +57,7 @@ const userSchema = new mongoose.Schema(
     },
     phone: {
       type: String,
-      required: [true, "User phone number required"],
+      // required: [true, "User phone number required"],
       validate: {
         validator: function (v) {
           // Custom validation: Phone number should start with 6-9 and be 10 digits long

@@ -2,6 +2,8 @@ const express = require("express");
 const connectDB = require("./config/database");
 const mongoSanitize = require("express-mongo-sanitize");
 const User = require("./model/user");
+const { validateSignUp } = require("./utils/validation");
+const bcrypt = require("bcrypt");
 
 const app = express();
 
@@ -12,13 +14,25 @@ app.use(express.json());
 app.use(mongoSanitize());
 
 app.post("/signup", async (req, res) => {
-  const user = new User(req.body);
-
   try {
+    //Validation
+    validateSignUp(req);
+
+    const { firstName, lastName, email, password } = req.body;
+    //password encryption
+    const passwordHash = await bcrypt.hash(password, 10);
+
+    const user = new User({
+      firstName,
+      lastName,
+      email,
+      password: passwordHash,
+    });
+
     await user.save();
     res.send("User added successfully!!!");
   } catch (err) {
-    res.status(400).send("Error while creating the User " + err.message);
+    res.status(400).send("ERROR : " + err.message);
   }
 });
 
