@@ -5,22 +5,35 @@ const userAuth = async (req, res, next) => {
   try {
     const { token } = req.cookies;
 
-    if (!token) {
-      throw new Error("Token is invalid!!");
+    // Log cookies for debugging
+    console.log("Cookies received: ", req.cookies);
+
+    if (!token || typeof token !== "string") {
+      throw new Error("Token is invalid or missing!");
     }
 
-    const decodeObj = jwt.verify(token, "This is");
+    // Verify the token and catch any errors
+    const decodeObj = jwt.verify(token, "This is", (err, decoded) => {
+      if (err) {
+        throw new Error("JWT verification failed: " + err.message);
+      }
+      return decoded;
+    });
 
+    console.log("Decoded Object: ", decodeObj);
+
+    // Find the user using the decoded ID
     const user = await User.findById(decodeObj._id);
 
     if (!user) {
-      throw new Error("User not found!!");
+      throw new Error("User not found with this ID!!");
     }
 
     req.user = user;
     next();
   } catch (err) {
-    res.status(400).send("ERROR : " + err.message);
+    console.error("ERROR in auth middleware: ", err.message);
+    res.status(400).send("ERROR auth: " + err.message);
   }
 };
 

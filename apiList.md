@@ -1,10 +1,23 @@
-Auth
+## authRouter
+
 -POST /signup
 -POST /login
 -POST /logout
 
--GET /profiles/all
--PATCH /profile
+## profileRouter
+
+-GET /profiles/view
+-PATCH /profile/edit
+-PATCH /profile/password
+
+## connectionRequestRouter
+
+-POST /request/send/interested/:userId
+-POST /request/send/ignored/:userId
+-POST /request/review/accepted/:requestId
+-POST /request/review/rejected/:requestId
 
 
--GET /
+## userRouter
+-GET /user/connections
+-GET /user/requests
