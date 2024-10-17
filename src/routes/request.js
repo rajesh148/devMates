@@ -13,6 +13,8 @@ requestRouter.post(
       const toUserId = req.params.toUserId;
       const status = req.params.status;
 
+      const loggedInUser = req.user;
+
       const allowedStatus = ["interested", "ignored"];
 
       if (!allowedStatus.includes(status)) {
@@ -58,12 +60,61 @@ requestRouter.post(
       console.log(status);
       const data = await connectionRequest.save();
 
-      res
-        .status(201)
-        .json({ message: "You have " + status + "this request", data });
+      res.status(201).json({
+        message:
+          loggedInUser.firstName +
+          " have " +
+          status +
+          " this request with " +
+          toUser.firstName,
+        data,
+      });
     } catch (err) {
       res.status(400).send("ERROR in SEND REQUEST " + err.message);
     }
   }
 );
+
+requestRouter.post(
+  "/request/review/:status/:requestId",
+  userAuth,
+  async (req, res) => {
+    try {
+      const loggedInUser = req.user;
+      const { status, requestId } = req.params;
+
+      const allowedStatus = ["accepted", "rejected"];
+
+      if (!allowedStatus.includes(status)) {
+        return res.status(400).json({
+          message: status + " status request not allowed",
+        });
+      }
+
+      const connectionRequest = await ConnectionRequest.findOne({
+        _id: requestId,
+        toUserId: loggedInUser._id,
+        status: "interested",
+      });
+
+      if (!connectionRequest) {
+        return res.status(404).json({
+          message: "Request id not found in our DB",
+        });
+      }
+
+      connectionRequest.status = status;
+
+      const data = await connectionRequest.save();
+
+      res.status(200).json({
+        message: "Connection request " + status,
+        data,
+      });
+    } catch (err) {
+      res.status(400).send("ERROR in review REQUEST" + err.message);
+    }
+  }
+);
+
 module.exports = requestRouter;
