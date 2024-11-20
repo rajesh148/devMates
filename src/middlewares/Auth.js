@@ -9,7 +9,7 @@ const userAuth = async (req, res, next) => {
     console.log("Cookies received: ", req.cookies);
 
     if (!token || typeof token !== "string") {
-      throw new Error("Token is invalid or missing!");
+      return res.status(401).send("Please login");
     }
 
     // Verify the token and catch any errors

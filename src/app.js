@@ -28,12 +28,12 @@ app.use(helmet());
 // Use Morgan in 'dev' mode
 app.use(morgan("dev"));
 
-// const corsOptions = {
-//   origin: true, //included origin as true
-//   credentials: true, //included credentials as true
-// };
+const corsOptions = {
+  origin: true, //included origin as true
+  credentials: true, //included credentials as true
+};
 
-// app.use(cors(corsOptions));
+app.use(cors(corsOptions));
 
 app.use("/", authRouter);
 app.use("/", profileRouter);
