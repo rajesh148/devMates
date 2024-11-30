@@ -28,12 +28,55 @@ app.use(helmet());
 // Use Morgan in 'dev' mode
 app.use(morgan("dev"));
 
-const corsOptions = {
-  origin: true, //included origin as true
-  credentials: true, //included credentials as true
-};
+// const corsOptions = {
+//   origin: "http://localhost:5173", // Your frontend URL
+//   credentials: true, // Allow cookies and credentials
+//   methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"], // Explicitly allow PATCH
+//   allowedHeaders: ["Content-Type", "Authorization"], // Include required headers
+// };
 
-app.use(cors(corsOptions));
+// app.use(cors(corsOptions));
+
+// app.use((req, res, next) => {
+//   console.log("Request method:", req.method);
+//   console.log("Request headers:", req.headers);
+//   next();
+// });
+
+app.use(function (req, res, next) {
+  res.setHeader("Access-Control-Allow-Origin", "http://localhost:5173"); // Update to match your frontend origin
+  res.setHeader(
+    "Access-Control-Allow-Methods",
+    "GET, POST, PUT, PATCH, DELETE, OPTIONS"
+  ); // Add PATCH explicitly
+  res.setHeader(
+    "Access-Control-Allow-Headers",
+    "Content-Type, Authorization, X-Requested-With"
+  );
+  res.setHeader("Access-Control-Allow-Credentials", "true"); // For credentials
+  if (req.method === "OPTIONS") {
+    // Handle preflight requests
+    return res.sendStatus(200);
+  }
+  next();
+});
+
+// app.use((req, res, next) => {
+//   res.setHeader("Access-Control-Allow-Origin", "http://localhost:5173"); // Replace with your frontend URL
+//   res.setHeader(
+//     "Access-Control-Allow-Methods",
+//     "GET, POST, PUT, DELETE, PATCH, OPTIONS" // Add PATCH and OPTIONS here
+//   );
+//   res.setHeader(
+//     "Access-Control-Allow-Headers",
+//     "Content-Type, Authorization" // Include headers as needed
+//   );
+//   res.setHeader("Access-Control-Allow-Credentials", true); // Allow credentials
+//   if (req.method === "OPTIONS") {
+//     return res.sendStatus(200); // Handle preflight requests
+//   }
+//   next();
+// });
 
 app.use("/", authRouter);
 app.use("/", profileRouter);
