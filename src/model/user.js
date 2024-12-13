@@ -57,7 +57,7 @@ const userSchema = new mongoose.Schema(
         message: (props) => `${props.value} is not a valid gender.`,
       },
     },
-    phone: {
+    mobileNumber: {
       type: String,
       // required: [true, "User phone number required"],
       validate: {
@@ -85,6 +85,7 @@ const userSchema = new mongoose.Schema(
     },
     skills: {
       type: [String],
+      required: [true, "Atleaset add one skill"],
     },
   },
   {
