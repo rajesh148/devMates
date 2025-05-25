@@ -13,12 +13,16 @@ const userAuth = async (req, res, next) => {
     }
 
     // Verify the token and catch any errors
-    const decodeObj = jwt.verify(token, "This is", (err, decoded) => {
-      if (err) {
-        throw new Error("JWT verification failed: " + err.message);
+    const decodeObj = jwt.verify(
+      token,
+      process.env.JWT_SECRET,
+      (err, decoded) => {
+        if (err) {
+          throw new Error("JWT verification failed: " + err.message);
+        }
+        return decoded;
       }
-      return decoded;
-    });
+    );
 
     console.log("Decoded Object: ", decodeObj);
 
